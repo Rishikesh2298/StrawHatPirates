@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AuthVerifier.ai – Content Authenticity Verifier</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <span class="brand-text">AuthVerifier<span class="brand-accent">.ai</span></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#api">API</a></li>
+      <li><a href="#about">About</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn-secondary">Sign In</button>
+      <button class="btn-primary">Get Started</button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      DIGITAL TRUST PROTOCOL
+    </div>
+    <h1 class="hero-title">Content Authenticity Verifier</h1>
+    <p class="hero-subtitle">Analyze text and images instantly to detect AI-generated content patterns with our deep learning neural network.</p>
+
+    <!-- ANALYZER CARD -->
+    <div class="analyzer-card">
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" id="tab-text" onclick="switchTab('text')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Text Analysis
+        </button>
+        <button class="tab" id="tab-image" onclick="switchTab('image')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Image Forensics
+        </button>
+      </div>
+
+      <!-- TEXT PANEL -->
+      <div class="panel" id="panel-text">
+        <label class="panel-label">Paste your text content below</label>
+        <textarea id="text-input" placeholder="Enter article text, news snippet, or essay to verify authenticity..." rows="7"></textarea>
+        <div class="char-count"><span id="char-count">0</span> characters</div>
+        <div class="panel-footer">
+          <button class="btn-verify" id="btn-text-verify" onclick="analyzeText()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Verify Authenticity
+          </button>
+        </div>
+      </div>
+
+      <!-- IMAGE PANEL -->
+      <div class="panel hidden" id="panel-image">
+        <label class="panel-label">Upload an image for forensics analysis</label>
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <div class="drop-inner">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6d6d8a" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <p>Drag & drop image here or <span class="link-text">browse</span></p>
+            <span class="drop-hint">PNG, JPG, WEBP up to 10MB</span>
+          </div>
+          <img id="image-preview" class="hidden" alt="Preview"/>
+        </div>
+        <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)"/>
+        <div class="panel-footer">
+          <button class="btn-secondary-sm" id="btn-clear-image" onclick="clearImage()" style="display:none;">Clear</button>
+          <button class="btn-verify" id="btn-image-verify" onclick="analyzeImage()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Analyze Image
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results-section" class="results-section hidden">
+      <!-- Spinner -->
+      <div id="loading-spinner" class="spinner-wrap hidden">
+        <div class="spinner"></div>
+        <p class="spinner-text">Analyzing content...</p>
+      </div>
+
+      <!-- Result Card -->
+      <div id="result-card" class="result-card hidden">
+        <div class="result-header">
+          <div class="verdict-badge" id="verdict-badge"></div>
+          <div class="confidence-tag" id="confidence-tag"></div>
+        </div>
+
+        <!-- Score bars -->
+        <div class="score-section">
+          <div class="score-row">
+            <span class="score-label ai-label">AI-Generated</span>
+            <div class="score-bar-wrap">
+              <div class="score-bar ai-bar" id="ai-bar"></div>
+            </div>
+            <span class="score-pct" id="ai-pct">—</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label human-label">Human-Written</span>
+            <div class="score-bar-wrap">
+              <div class="score-bar human-bar" id="human-bar"></div>
+            </div>
+            <span class="score-pct" id="human-pct">—</span>
+          </div>
+        </div>
+
+        <!-- Note -->
+        <div id="result-note" class="result-note hidden"></div>
+
+        <!-- Sources -->
+        <div id="sources-section" class="sources-section hidden">
+          <div class="sources-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+            Web Sources Found
+          </div>
+          <div id="sources-list" class="sources-list"></div>
+        </div>
+        <div id="no-sources" class="no-sources hidden">No matching sources found on the web.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="how">
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-tag accuracy">99.8% Accuracy</div>
+        <h3>Neural Detection</h3>
+        <p>Advanced transformer models trained on millions of samples for precise AI content identification.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-tag realtime">Real-time</div>
+        <h3>Instant Analysis</h3>
+        <p>Get verification results in seconds, not minutes. Powered by optimized inference pipelines.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-tag secure">Secure</div>
+        <h3>Privacy First</h3>
+        <p>Content is processed in memory and never stored. Your data stays private and secure.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-tag source">Web Tracking</div>
+        <h3>Source Finder</h3>
+        <p>Automatically searches the web to find where the text or image originally appeared.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-brand">
+      <div class="brand-icon small">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <span>AuthVerifier<span class="brand-accent">.ai</span></span>
+    </div>
+    <p class="footer-text">© 2026 AuthVerifier.ai — Powered by Sapling AI & SerpAPI</p>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
